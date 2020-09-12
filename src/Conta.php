@@ -6,15 +6,23 @@ namespace Alfa; //package no java, faz parte do pacote Alfa
 
 class Conta {
     //tipagem a partir do php 7.4
-    public int    $numero;
-    public string $titular;
-    public float  $saldo;
-
+    private int    $numero;
+    private string $titular;
+    private float  $saldo;
+    private float  $taxa = 5.00;
+    private float  $limite = 1000.00;
     public static array $movimentacoes = [];
+
+    public function __construct( int $numero, string $titular, float $saldo )
+    {
+        $this->numero = $numero;
+        $this->titular = $titular;
+        $this->saldo = $saldo;
+    }
     //
 
     public function sacar(float $valor) : bool {
-        if ($this->saldo < $valor) {
+        if (!$this->possuiSaldo($valor)) {
             return false;
         }
 
@@ -24,19 +32,33 @@ class Conta {
         return true;
     }
 
-    public function depositar(float $valor) : void {
+    private function possuiSaldo(float $valor) : bool
+    {
+        return ($this->pegarSaldo() >= $valor);
+    }
+
+
+    public function depositar(float $valor) : void
+    {
         $this->saldo += $valor;
         self::$movimentacoes[] = sprintf("[%s] Depósito %s", $this->titular, $valor);
     }
 
-    public function transferir(Conta $contaDestino, float $valor) : bool {
+    public function transferir(Conta $contaDestino, float $valor) : bool
+    {
 
         $retirou = $this->sacar($valor);
 
-        if ($retirou) {
+        if ($retirou)
+        {
             $contaDestino->depositar($valor);
         }
         return $retirou;
+    }
+
+    public function pegarSaldo() :float
+    {
+        return $this->saldo - $this->taxa + $this->limite;
     }
 
 }
